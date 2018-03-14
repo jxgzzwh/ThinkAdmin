@@ -44,7 +44,9 @@ class AccessAuth
     {
         $this->request = Request::instance();
         list($module, $controller, $action) = [$this->request->module(), $this->request->controller(), $this->request->action()];
-        $node = strtolower("{$module}/{$controller}/{$action}");
+
+        //兼容多级目录控制器 含有"."的情况
+        $node = strtolower(str_replace('.','/',"{$module}/{$controller}/{$action}"));
         $info = Db::name('SystemNode')->where('node', $node)->find();
         $access = [
             'is_menu'  => intval(!empty($info['is_menu'])),

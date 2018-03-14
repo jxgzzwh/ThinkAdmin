@@ -171,4 +171,26 @@ class ToolsService
         }
         return $result;
     }
+
+    /**
+     * 根据节点路径判断当前节点是否为公共方法
+     * @param $path
+     * @return bool
+     */
+    public static function isFunctionByNodePath($path)
+    {
+        if(substr_count($path,'/')<2)
+        {
+            return FALSE;
+        }
+        $moduleName = substr($path,0,strpos($path,'/'));
+        $actionName = substr($path,strrpos($path,'/')+1);
+        $filePath = trim(substr($path,strlen($moduleName),strlen($path)-strlen($moduleName)-strlen($actionName)),'/');
+        $className = str_replace('/','\\',config('app_namespace') .'/'.$moduleName .'/'.config('url_controller_layer').'/'.$filePath);
+        if(class_exists($className))
+        {
+            return method_exists((new $className),$actionName);
+        }
+        return FALSE;
+    }
 }

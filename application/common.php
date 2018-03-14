@@ -171,3 +171,13 @@ if (!function_exists("array_column")) {
     }
 
 }
+
+/**
+     * 根据节点路径判断当前节点是否为公共方法
+     * @param $path
+     * @return bool
+     */
+function isFunctionByNodePath($path)
+{
+    return \service\ToolsService::isFunctionByNodePath($path);
+}

@@ -96,10 +96,15 @@ class NodeService
                 }
             }
             $tmp = explode('/', $thr);
-            list($one, $two) = ["{$tmp[0]}", "{$tmp[0]}/{$tmp[1]}"];
-            $nodes[$one] = array_merge(isset($alias[$one]) ? $alias[$one] : ['node' => $one, 'title' => '', 'is_menu' => 0, 'is_auth' => 0, 'is_login' => 0], ['pnode' => '']);
-            $nodes[$two] = array_merge(isset($alias[$two]) ? $alias[$two] : ['node' => $two, 'title' => '', 'is_menu' => 0, 'is_auth' => 0, 'is_login' => 0], ['pnode' => $one]);
-            $nodes[$thr] = array_merge(isset($alias[$thr]) ? $alias[$thr] : ['node' => $thr, 'title' => '', 'is_menu' => 0, 'is_auth' => 0, 'is_login' => 0], ['pnode' => $two]);
+
+            //生成代码节点数组
+            for($i=0;$i<count($tmp);$i++)
+            {
+                $node = implode('/',$tmp);
+                array_pop($tmp);
+                $pnode = implode('/',$tmp);
+                $nodes[$node] = array_merge(isset($alias[$node]) ? $alias[$node] : ['node' => $node, 'title' => '', 'is_menu' => 0, 'is_auth' => 0, 'is_login' => 0], ['pnode' => $pnode]);
+            }
         }
         foreach ($nodes as &$node) {
             list($node['is_auth'], $node['is_menu'], $node['is_login']) = [
@@ -119,7 +124,7 @@ class NodeService
     public static function getNodeTree($path, $nodes = [])
     {
         foreach (self::_getFilePaths($path) as $vo) {
-            if (!preg_match('|/(\w+)/controller/(\w+)|', str_replace(DS, '/', $vo), $matches) || count($matches) !== 3) {
+            if (!preg_match('|/(\w+)/'.config('url_controller_layer').'((?:\/\w+)+)|', str_replace(DS, '/', $vo), $matches) || count($matches) !== 3) {
                 continue;
             }
             $className = config('app_namespace') . str_replace('/', '\\', $matches[0]);
@@ -128,7 +133,7 @@ class NodeService
             }
             foreach (get_class_methods($className) as $actionName) {
                 if ($actionName[0] !== '_') {
-                    $nodes[] = strtolower("{$matches[1]}/{$matches[2]}/{$actionName}");
+                    $nodes[] = strtolower("{$matches[1]}{$matches[2]}/{$actionName}");
                 }
             }
         }
